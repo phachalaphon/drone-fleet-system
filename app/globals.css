@@ -26,3 +26,4 @@ input{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inher
 .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
 .stat b{display:block;font-size:1.6rem}
 select,textarea{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+.brand{color:var(--text);text-decoration:none}

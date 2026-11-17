@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <h1>ภาพรวมระบบซ่อมบำรุงและคลังอะไหล่</h1>
+      <h1>วิเคราะห์ซ่อมบำรุงและคลังอะไหล่</h1>
       <p className="muted">ข้อมูลจาก View ใน Supabase</p>
       {error && <p className="error">โหลดข้อมูลไม่สำเร็จ: {error}</p>}
 
