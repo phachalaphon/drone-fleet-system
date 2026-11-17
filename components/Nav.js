@@ -31,6 +31,8 @@ export default function Nav() {
           <Link href="/trainings">อบรม</Link>
           <Link href="/records">ใบงานซ่อม</Link>
           <Link href="/parts">อะไหล่</Link>
+          <Link href="/mission-analysis">วิเคราะห์ภารกิจ</Link>
+          <Link href="/pilot-analysis">วิเคราะห์นักบิน</Link>
         </nav>
         <div className="nav-user">
           <span className="muted small">{email}</span>
