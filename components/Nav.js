@@ -34,6 +34,8 @@ export default function Nav() {
           <Link href="/mission-analysis">วิเคราะห์ภารกิจ</Link>
           <Link href="/pilot-analysis">วิเคราะห์นักบิน</Link>
           <Link href="/">วิเคราะห์ซ่อมบำรุง</Link>
+          <span className="muted">|</span>
+          <Link href="/chat">Chat</Link>
         </nav>
         <div className="nav-user">
           <span className="muted small">{email}</span>
