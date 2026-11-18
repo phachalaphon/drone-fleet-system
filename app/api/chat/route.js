@@ -82,6 +82,19 @@ async function handle(req) {
 
   const body = await req.json().catch(() => ({}))
 
+
+  if (body.listModels) {
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200', {
+      headers: { 'x-goog-api-key': process.env.GEMINI_API_KEY },
+      signal: AbortSignal.timeout(15000),
+    })
+    const j = await r.json().catch(() => ({}))
+    const names = (j.models || [])
+      .filter((m) => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map((m) => m.name.replace(/^models\//, ''))
+      .filter((n) => n.startsWith('gemini'))
+    return NextResponse.json({ status: r.status, current: MODEL, models: names, error: j.error?.message })
+  }
   if (body.diag) {
     const time = async (label, fn) => {
       const t0 = Date.now()
