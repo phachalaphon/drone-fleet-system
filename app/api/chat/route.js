@@ -6,8 +6,8 @@ export const maxDuration = 60
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 const MAX_STEPS = 4
-const CALL_TIMEOUT_MS = 28000
-const TOTAL_BUDGET_MS = 55000
+const CALL_TIMEOUT_MS = 22000
+const TOTAL_BUDGET_MS = 45000
 // ไม่บังคับ: ตั้ง GEMINI_THINKING=low (หรือ minimal) ใน Vercel เพื่อให้โมเดลคิดน้อยลงและตอบเร็วขึ้น
 const THINKING = process.env.GEMINI_THINKING
 
@@ -94,11 +94,11 @@ async function handle(req) {
       }
     }
     const ask = (t) => [{ role: 'user', parts: [{ text: t }] }]
-    const dl = () => Date.now() + 27000
+    const dl = () => Date.now() + 14000
     const results = []
-    results.push(await time('A) ไม่มี Tool ไม่ตั้ง thinking', () => callGemini(ask('ตอบสั้นๆ ว่า OK'), dl(), { noTools: true, noThinking: true })))
-    results.push(await time(`B) ไม่มี Tool thinking=${THINKING || '(ไม่ตั้ง)'}`, () => callGemini(ask('ตอบสั้นๆ ว่า OK'), dl(), { noTools: true })))
-    results.push(await time('C) มี Tool (ถามอะไหล่แพง)', () => callGemini(ask('มีอะไหล่อะไรบ้างที่ราคาเกิน 5000 บาท'), dl())))
+    results.push(await time('A) ไม่มี Tool ไม่ตั้ง thinking', () => callGeminiOnce(MODEL, ask('ตอบสั้นๆ ว่า OK'), dl(), { noTools: true, noThinking: true })))
+    results.push(await time(`B) ไม่มี Tool thinking=${THINKING || '(ไม่ตั้ง)'}`, () => callGeminiOnce(MODEL, ask('ตอบสั้นๆ ว่า OK'), dl(), { noTools: true })))
+    results.push(await time('C) มี Tool (ถามอะไหล่แพง)', () => callGeminiOnce(MODEL, ask('มีอะไหล่อะไรบ้างที่ราคาเกิน 5000 บาท'), dl())))
     return NextResponse.json({ model: MODEL, thinking: THINKING || null, results })
   }
   const history = Array.isArray(body.messages) ? body.messages.slice(-8) : []
