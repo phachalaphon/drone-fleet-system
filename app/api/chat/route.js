@@ -6,6 +6,7 @@ export const maxDuration = 30
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 const MAX_STEPS = 4
+const GEMINI_TIMEOUT_MS = 20000
 
 const SYSTEM_PROMPT = `คุณคือผู้ช่วยตอบคำถามเกี่ยวกับระบบจัดการฝูงโดรนและภารกิจ (ซ่อมบำรุง/คลังอะไหล่, ภารกิจ/เที่ยวบิน, นักบิน/การจอง)
 กติกา:
@@ -19,6 +20,7 @@ async function callGemini(contents) {
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+    signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents,
@@ -33,7 +35,7 @@ async function callGemini(contents) {
   return res.json()
 }
 
-export async function POST(req) {
+async function handle(req) {
   if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: 'ยังไม่ได้ตั้งค่า GEMINI_API_KEY บนเซิร์ฟเวอร์' }, { status: 500 })
   }
@@ -108,4 +110,13 @@ export async function POST(req) {
   } catch {}
 
   return NextResponse.json({ answer, evidence })
+}
+
+export async function POST(req) {
+  try {
+    return await handle(req)
+  } catch (e) {
+    console.error('chat route error', e)
+    return NextResponse.json({ error: `เซิร์ฟเวอร์ผิดพลาด: ${e?.message || e}` }, { status: 500 })
+  }
 }

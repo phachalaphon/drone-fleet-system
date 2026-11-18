@@ -69,7 +69,13 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ messages: next.map((m) => ({ role: m.role, text: m.text })) }),
       })
-      const json = await res.json()
+      const raw = await res.text()
+      let json
+      try {
+        json = JSON.parse(raw)
+      } catch {
+        throw new Error(`เซิร์ฟเวอร์ตอบกลับผิดรูปแบบ (HTTP ${res.status}): ${raw.slice(0, 300)}`)
+      }
       if (!res.ok) throw new Error(json.error || 'เกิดข้อผิดพลาด')
       setMessages([...next, { role: 'assistant', text: json.answer, evidence: json.evidence }])
     } catch (e) {
