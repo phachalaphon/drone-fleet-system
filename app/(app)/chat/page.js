@@ -54,6 +54,22 @@ export default function ChatPage() {
     bottom.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
+  const [diag, setDiag] = useState(null)
+  const runDiag = async () => {
+    setDiag('กำลังทดสอบ (ใช้เวลาไม่เกิน 1 นาที)...')
+    try {
+      const { data } = await supabase.auth.getSession()
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session?.access_token}` },
+        body: JSON.stringify({ diag: true }),
+      })
+      setDiag(await res.text())
+    } catch (e) {
+      setDiag(String(e.message))
+    }
+  }
+
   const send = async (text) => {
     const q = (text ?? input).trim()
     if (!q || loading) return
@@ -122,6 +138,12 @@ export default function ChatPage() {
         {loading && <p className="muted">กำลังประมวลผล...</p>}
         <div ref={bottom} />
       </section>
+
+      <details style={{ marginBottom: 12 }}>
+        <summary className="small muted">ทดสอบการเชื่อมต่อ LLM (สำหรับตรวจปัญหา)</summary>
+        <button type="button" className="btn" onClick={runDiag}>เริ่มทดสอบ</button>
+        {diag && <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>{diag}</pre>}
+      </details>
 
       <form
         style={{ display: 'flex', gap: 8 }}
