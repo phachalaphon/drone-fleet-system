@@ -6,7 +6,7 @@ export const maxDuration = 60
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 const MAX_STEPS = 4
-const CALL_TIMEOUT_MS = 22000
+const CALL_TIMEOUT_MS = 14000
 const TOTAL_BUDGET_MS = 45000
 // ไม่บังคับ: ตั้ง GEMINI_THINKING=low (หรือ minimal) ใน Vercel เพื่อให้โมเดลคิดน้อยลงและตอบเร็วขึ้น
 const THINKING = process.env.GEMINI_THINKING
@@ -55,11 +55,11 @@ async function callGemini(contents, deadline, opts = {}) {
         return await callGeminiOnce(model, contents, deadline, opts)
       } catch (e) {
         lastErr = e
-        const retryable = [503, 429, 500].includes(e.status) || e.name === 'TimeoutError'
-        if (e.status === 404) break // ไม่มีโมเดลนี้ ข้ามไปตัวถัดไป
-        if (!retryable) throw e
+        // หมดเวลา/ไม่มีโมเดล/ผิดพลาดฝั่ง Google: สลับไปโมเดลถัดไปทันที ไม่ลองตัวเดิมซ้ำ
+        if (e.status === 404 || e.name === 'TimeoutError' || e.name === 'AbortError') break
+        if (![503, 429, 500].includes(e.status)) throw e
         if (deadline - Date.now() < 6000) throw e
-        await new Promise((r) => setTimeout(r, 800))
+        await new Promise((r) => setTimeout(r, 600))
       }
     }
   }
